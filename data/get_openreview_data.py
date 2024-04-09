@@ -33,7 +33,7 @@ def make_path(directories, filename=None):
 
 def get_sorted_references(note):
   return [note] + sorted(
-      GUEST_CLIENT.get_references(referent=note.id, original=True),
+      GUEST_CLIENT.get_references(referent=note.id, original=False) + GUEST_CLIENT.get_references(referent=note.id, original=True),
       key=lambda x: x.tcdate,
   )
 
@@ -70,7 +70,10 @@ def write_artifact(
 
   this_checksum = None
   try:  # try to get the PDF for this submission or revision
+    print(revision.id)
     pdf_binary = GUEST_CLIENT.get_pdf(revision.id, is_reference=is_reference)
+    if pdf_binary is None:
+      pdf_binary = GUEST_CLIENT.get_pdf(revision.id, is_reference=not is_reference)
     this_checksum = hashlib.md5(pdf_binary).hexdigest()
     if this_checksum in checksum_to_path:
       pdf_path = checksum_to_path[this_checksum]
